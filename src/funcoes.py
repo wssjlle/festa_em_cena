@@ -110,3 +110,40 @@ def marcar_problemas(df: pd.DataFrame) -> pd.DataFrame:
     df = df.copy()
     df["tem_problema"] = df["erro_quantidade"] | df["erro_preco"]
     return df
+
+def tratar_datas(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Converte data_venda para datetime e cria versão brasileira.
+    Marca datas inválidas.
+    """
+    df = df.copy()
+    
+    df["data_venda_dt"] = pd.to_datetime(df["data_venda"], errors="coerce")
+    df["erro_data"] = df["data_venda_dt"].isna()
+    
+    # Formato brasileiro
+    df["data_br"] = df["data_venda_dt"].dt.strftime("%d/%m/%Y")
+    
+    # Componentes úteis
+    df["ano"] = df["data_venda_dt"].dt.year
+    df["mes"] = df["data_venda_dt"].dt.month
+    df["hora"] = df["data_venda_dt"].dt.hour
+    
+    return df
+
+
+def investigar_entrega(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Investiga se todo pedido sem data_entrega é Cancelado.
+    Cria flags e retorna o DataFrame enriquecido.
+    """
+    df = df.copy()
+    
+    sem_entrega = df["data_entrega"].fillna("").str.strip() == ""
+    cancelado = df["status_pedido"].str.strip() == "Cancelado"
+    
+    df["sem_data_entrega"] = sem_entrega
+    df["entrega_e_cancelado"] = sem_entrega & cancelado
+    df["entrega_nao_cancelado"] = sem_entrega & ~cancelado
+    
+    return df
