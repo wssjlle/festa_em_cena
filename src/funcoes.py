@@ -68,9 +68,45 @@ def padronizar_canal(df: pd.DataFrame) -> pd.DataFrame:
     limpo2 = limpo.str.replace(r"\s+", " ", regex=True).str.strip()
     df.loc[nao_mapeado, "canal_padrao"] = limpo2[nao_mapeado].map(mapa)
     
-    # Flag: houve qualquer alteração em relação ao original (espaços, caixa, etc.)
-    original_limpo = original.str.strip().str.lower()
-        # Flag: o valor original (antes de qualquer limpeza) era diferente do final
+
+    # Flag: o valor original (antes de qualquer limpeza) era diferente do final
     df["canal_padronizado"] = original != df["canal_padrao"]
     
+    return df
+
+def validar_quantidade(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Marca erro_quantidade quando o valor não é um inteiro maior que zero.
+    """
+    df = df.copy()
+    
+    # Tenta converter para número
+    qtd = pd.to_numeric(df["quantidade"], errors="coerce")
+    
+    df["erro_quantidade"] = (
+        qtd.isna() |          # não é número
+        (qtd <= 0) |          # zero ou negativo
+        (qtd != qtd.astype(int))  # não é inteiro
+    )
+    return df
+
+
+def validar_preco(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Marca erro_preco quando o preço está ausente ou é negativo.
+    """
+    df = df.copy()
+    
+    preco = pd.to_numeric(df["preco_unitario"], errors="coerce")
+    
+    df["erro_preco"] = preco.isna() | (preco < 0)
+    return df
+
+
+def marcar_problemas(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Cria a flag tem_problema (qualquer erro de quantidade ou preço).
+    """
+    df = df.copy()
+    df["tem_problema"] = df["erro_quantidade"] | df["erro_preco"]
     return df
