@@ -1,8 +1,23 @@
+"""
+Script principal do projeto Festa em Cena.
+
+Fluxo das sprints:
+1. Leitura do CSV (tudo como texto)
+2. Padronização de categoria e canal
+3. Validação de quantidade e preço
+4. Tratamento de datas e investigação da regra de entrega
+"""
+
 import pandas as pd
 from funcoes import (
-    carregar_dados, padronizar_categoria, padronizar_canal,
-    validar_quantidade, validar_preco, marcar_problemas,
-    tratar_datas, investigar_entrega
+    carregar_dados, 
+    padronizar_categoria, 
+    padronizar_canal,
+    validar_quantidade, 
+    validar_preco, 
+    marcar_problemas,
+    tratar_datas, 
+    investigar_entrega
 )
 
 def main():
@@ -12,7 +27,7 @@ def main():
     print("=== Verificação inicial ===")
     print(f"Total de linhas: {df.shape[0]}")
     
-    # Sprint 2
+    # Sprint 2 - Padronização do texto
     df = padronizar_categoria(df)
     df = padronizar_canal(df)
     
@@ -21,7 +36,7 @@ def main():
     print(f"Categorias alteradas (não vazias): {df['categoria_alterada'].sum()}")
     print(f"Canais padronizados: {df['canal_padronizado'].sum()}")
     
-    # Sprint 3
+    # Sprint 3 - Validação dos números
     df = validar_quantidade(df)
     df = validar_preco(df)
     df = marcar_problemas(df)
@@ -35,7 +50,7 @@ def main():
     print("\nDistribuição dos erros (sem sobreposição esperada):")
     print(df[["erro_quantidade", "erro_preco"]].value_counts())
 
-    # Sprint 4
+    # Sprint 4 - Datas e regras de negócio
     df = tratar_datas(df)
     df = investigar_entrega(df)
     
